@@ -2,7 +2,6 @@ import 'dart:io';
 
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:control_inv/models/services/services_model.dart';
-import 'package:control_inv/services/db_service_offline.dart';
 import 'package:control_inv/services/db_service_online.dart';
 import 'package:control_inv/widgets/widgets.dart';
 import 'package:flutter/material.dart';
