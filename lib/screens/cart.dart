@@ -145,16 +145,38 @@ class _CartScreenState extends State<CartScreen> {
                             },
                             icon: Icon(Icons.highlight_remove_sharp)
                           ),
-                          Image.file(File(listToShow![index].imagePath),
-                           /* se calcula la altura con la anchura de la pantlla, porque la anchura es
-                           menos variable */
-                            height: 
-                            MediaQuery.of(context).orientation == Orientation.portrait ? 
-                            //getting up
-                            MediaQuery.of(context).size.width * 0.3 : 
-                            //laying down
-                            MediaQuery.of(context).size.width * 0.1  ,
-                          ),
+                          
+                               Image.network('http://10.0.2.2:8085/uploads/${listToShow![index].imagePath}', 
+                              /* se calcula la altura con la anchura de la pantlla, porque la anchura es
+                             menos variable */
+                              height: 
+                              MediaQuery.of(context).orientation == Orientation.portrait ? 
+                              //getting up
+                              MediaQuery.of(context).size.width * 0.3 : 
+                              //laying down
+                              MediaQuery.of(context).size.width * 0.1,
+                               errorBuilder: (context, error, stackTrace) {
+                                return Image.file(File(listToShow![index].imagePath), 
+                                  /* se calcula la altura con la anchura de la pantlla, porque la anchura es
+                                menos variable */
+                                  height: 
+                                  MediaQuery.of(context).orientation == Orientation.portrait ? 
+                                  //getting up
+                                  MediaQuery.of(context).size.width * 0.3 : 
+                                  //laying down
+                                  MediaQuery.of(context).size.width * 0.1 );
+                               } 
+                              ),
+                                
+                                /* Image.file(File(listToShow![index].imagePath), 
+                              /* se calcula la altura con la anchura de la pantlla, porque la anchura es
+                             menos variable */
+                              height: 
+                              MediaQuery.of(context).orientation == Orientation.portrait ? 
+                              //getting up
+                              MediaQuery.of(context).size.width * 0.3 : 
+                              //laying down
+                              MediaQuery.of(context).size.width * 0.2 )), */
                           SizedBox(width: 20,),
                           Expanded(
                             child: Column(

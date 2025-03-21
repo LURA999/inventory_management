@@ -1,5 +1,6 @@
 import 'package:control_inv/models/services/services_model.dart';
 import 'package:control_inv/services/db_service_offline.dart';
+import 'package:control_inv/services/db_service_online.dart';
 import 'package:control_inv/widgets/pickerItemWidget.dart';
 import 'package:control_inv/widgets/widgets.dart';
 import 'package:flutter/material.dart';
@@ -34,7 +35,7 @@ class _HistorialScreenState extends State<HistorialScreen> {
   bool futureCharge = false;
 
   Future<void> loadingData() async {
-    List<HistorialModel>? listHistorial = await DBService.db.showSalesDate(dateInitial.value.toString().split(' ')[0], dateFinal.value.toString().split(' ')[0]).then((List<HistorialModel>? res) => res??[]);
+    List<HistorialModel>? listHistorial = await DbServiceOnline().showSalesDate(context,dateInitial.value.toString().split(' ')[0], dateFinal.value.toString().split(' ')[0]);
     if (listHistorial!.isNotEmpty) {
       listHistorialToShow = listHistorial;
     }else{
@@ -100,7 +101,7 @@ class _HistorialScreenState extends State<HistorialScreen> {
                     IconButton(
                       icon: Icon(Icons.search),
                       onPressed: () async {
-                        List<HistorialModel>? listHistorial = await DBService.db.showSalesDate(dateInitial.value.toString().split(' ')[0], dateFinal.value.toString().split(' ')[0]).then((List<HistorialModel>? res) => res??[]);
+                        List<HistorialModel>? listHistorial = await DbServiceOnline().showSalesDate(context,dateInitial.value.toString().split(' ')[0], dateFinal.value.toString().split(' ')[0]);
                         if (listHistorial!.isNotEmpty) {
                           listHistorialToShow = listHistorial;
                         }else{
@@ -214,7 +215,7 @@ class _HistorialScreenState extends State<HistorialScreen> {
                                                  Navigator.of(context).pop();
                                               }, child: Text('Cancelar')),
                                               TextButton(onPressed: () async {
-                                                await DBService.db.deleteSale(listHistorialToShow[index].id);
+                                                await DbServiceOnline().deleteFullSale(context, listHistorialToShow[index].id);
                                                 await loadingData();
                                                 Navigator.of(context).pop();
                                               }, 

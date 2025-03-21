@@ -1,7 +1,9 @@
 
+import 'dart:convert';
+
 import 'package:board_datetime_picker/board_datetime_picker.dart';
 import 'package:control_inv/models/services/services_model.dart';
-import 'package:control_inv/services/db_service_offline.dart';
+import 'package:control_inv/services/db_service_online.dart';
 import 'package:control_inv/widgets/indicatorPieChart.dart';
 import 'package:control_inv/widgets/widgets.dart';
 import 'package:flutter/material.dart';
@@ -55,7 +57,7 @@ class _ReportsScreenState extends State<ReportsScreen> {
     porcentColor = [];
     nameColor = [];
 
-    List<PieDataModel>? valuesPie = await DBService.db.showSalesPorcent(dateInitial.value.toString().split(' ')[0], dateFinal.value.toString().split(' ')[0]);
+    List<PieDataModel>? valuesPie = await DbServiceOnline().showSalesPorcent(context, dateInitial.value.toString().split(' ')[0], dateFinal.value.toString().split(' ')[0]);
 
     if (valuesPie != null) {
       for (var el in valuesPie) {
@@ -185,7 +187,7 @@ class _ReportsScreenState extends State<ReportsScreen> {
             ElevatedButton.icon(
               onPressed: () async {
               if (!(await Renovation().jwt())) {
-                List<Map<String, dynamic>>?  jsonStr = await DBService.db.showSalesReport(dateInitial.value.toString().split(' ')[0], dateFinal.value.toString().split(' ')[0]);
+                List<Map<String, dynamic>>?  jsonStr = await DbServiceOnline().showSalesReport(context, dateInitial.value.toString().split(' ')[0], dateFinal.value.toString().split(' ')[0]);
                 if (jsonStr != null){
                   await createReport(
                     dateInitial.value,

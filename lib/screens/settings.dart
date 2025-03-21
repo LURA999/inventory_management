@@ -1,8 +1,6 @@
 import 'dart:io';
-
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:control_inv/models/services/services_model.dart';
-import 'package:control_inv/services/db_service_offline.dart';
 import 'package:control_inv/services/db_service_online.dart';
 import 'package:control_inv/widgets/widgets.dart';
 import 'package:flutter/material.dart';
@@ -38,22 +36,40 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
   //Nos ayudara a verificar si hay internet
   bool isThereInternet = false;
-  Future<bool> conn() async {
+  
+  Future<void> conn() async {
+   
     await loadingData();
-    List<ConnectivityResult> varConn = await (Connectivity().checkConnectivity());
-     if (varConn[0] == ConnectivityResult.mobile || varConn[0] == ConnectivityResult.wifi) {
-      isThereInternet = true;
-      return true;
-    }else{
-      isThereInternet = false;
-      return false;
-    }
+    
   }
 
   //Se inicializan las lista de catalogos y la lista del menu
   Future<void> loadingData() async {
+     final result = await Connectivity().checkConnectivity();
+    if (result == ConnectivityResult.none) {
+      setState(() {
+        isThereInternet = false;
+      });
+    } else {
+      try {
+        List<InternetAddress> result = await InternetAddress.lookup('google.com');
+        if (result.isNotEmpty && result[1].rawAddress.isNotEmpty/* && result.:inlineRefs{references="&#91;&#123;&quot;type&quot;&#58;&quot;inline_reference&quot;,&quot;start_index&quot;&#58;1467,&quot;end_index&quot;&#58;1470,&quot;number&quot;&#58;0,&quot;url&quot;&#58;&quot;https&#58;//es.stackoverflow.com/questions/320193/controlar-la-conexi%C3%B3n-a-internet-en-una-app-flutter&quot;,&quot;favicon&quot;&#58;&quot;https&#58;//imgs.search.brave.com/RqnyZ_b_Jp4QsvL8nk-hPLE3AcHeZsLNnJ4lu2EYsns/rs&#58;fit&#58;32&#58;32&#58;1&#58;0/g&#58;ce/aHR0cDovL2Zhdmlj/b25zLnNlYXJjaC5i/cmF2ZS5jb20vaWNv/bnMvZTYxNzExMmYy/ODQ0OGE1OWY1ZTM4/MzhhNjZlOTBhOWJm/ZTA2Y2E4MGRjYTI3/YzgzODc0NTM5MDNh/OGY1ZTBlZi9lcy5z/dGFja292ZXJmbG93/LmNvbS8&quot;,&quot;snippet&quot;&#58;&quot;Para&#32;suscribirte&#32;a&#32;esta&#32;fuente&#32;RSS,&#32;copia&#32;y&#32;pega&#32;esta&#32;URL&#32;en&#32;tu&#32;lector&#32;RSS…&quot;&#125;&#93;"}rawAddress.isNotEmpty */) {
+          setState(() {
+            isThereInternet = true;
+          });
+        } else {
+          setState(() {
+            isThereInternet = false;
+          });
+        }
+      } on SocketException catch (_) {
+        setState(() {
+          isThereInternet = false;
+        });
+      }
+    }
+
     listDrop = await DbServiceOnline().showCategories(context);
-    
     if (listDrop.isNotEmpty) {
       saveCategory = listDrop[0].idCategory!;
 
@@ -213,13 +229,12 @@ class _SettingsScreenState extends State<SettingsScreen> {
                               Text(imageDataListToShow[index].name, style: TextStyle(fontWeight: FontWeight.bold)),
                               Container(
                                 alignment: Alignment.center,
-                                child: Image.file(File(imageDataListToShow[index].imagePath), height: 150,),
-                                /* 
+                                child: /* Image.file(File(imageDataListToShow[index].imagePath), height: 150,), */
                                 isThereInternet ?
-                                Image.network(imageDataListToShow[index].imagePath, height: 150,)
+                                Image.network('http://10.0.2.2:8085/uploads/${imageDataListToShow[index].imagePath}', height: 150,)
                                 :
                                 Image.file(File(imageDataListToShow[index].imagePath), height: 150,)
-                                */
+                                
                               ),
                               Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -269,7 +284,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
   //despliega las comidas y las guarda en un respaldo
   Future<bool> toShowList(int value) async {
-    imageDataList = await DBService.db.showFoodsCategory(value, 3).then((List<ImageData>? res) => res??[]);
+    
+    imageDataList = await DbServiceOnline().showFoodsCategory(context,value, 3).then((List<ImageData>? res) => res??[]);
     if(imageDataList.isEmpty){
       return false;
     }else{
@@ -280,7 +296,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
   }
 
   Future<void> toShowListSelected(int value) async {
-    imageDataList = await DBService.db.showFoodsCategory(value, 3).then((List<ImageData>? res) => res??[]);
+    imageDataList =await DbServiceOnline().showFoodsCategory(context,value, 3).then((List<ImageData>? res) => res??[]);
     imageDataListToShow = imageDataList;
   }
 }

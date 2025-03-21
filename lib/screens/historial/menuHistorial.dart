@@ -2,7 +2,7 @@
 import 'dart:io';
 
 import 'package:control_inv/models/services/services_model.dart';
-import 'package:control_inv/services/db_service_offline.dart';
+import 'package:control_inv/services/db_service_online.dart';
 import 'package:control_inv/widgets/widgets.dart';
 import 'package:flutter/material.dart';
 
@@ -41,7 +41,7 @@ class _MenuHistorialScreenState extends State<MenuHistorialScreen> {
   int total = 0; 
 
   Future<void> loadingData() async {
-    listDrop = await DBService.db.showCategories().then((List<Categories>? res) => res??[]);
+    listDrop = await DbServiceOnline().showCategories(context);
     if (listDrop.isNotEmpty) {
       saveCategory = listDrop[0].idCategory!;
       bool isThere = await toShowList(saveCategory!);  
@@ -192,7 +192,7 @@ class _MenuHistorialScreenState extends State<MenuHistorialScreen> {
                                   ),
                                 ],
                               ),
-                              Image.file(File(imageDataListToShow[index]!.imagePath),
+                              Image.network('http://10.0.2.2:8085/uploads/${imageDataListToShow[index]!.imagePath}', 
                               /* se calcula la altura con la anchura de la pantlla, porque la anchura es
                              menos variable */
                               height: 
@@ -200,7 +200,20 @@ class _MenuHistorialScreenState extends State<MenuHistorialScreen> {
                               //getting up
                               MediaQuery.of(context).size.width * 0.3 : 
                               //laying down
-                              MediaQuery.of(context).size.width * 0.2 ),
+                              MediaQuery.of(context).size.width * 0.1,
+
+                              //segunda opcion
+                              errorBuilder: (context, error, stackTrace) => 
+                              Image.file(File(imageDataListToShow[index]!.imagePath), 
+                                /* se calcula la altura con la anchura de la pantlla, porque la anchura es
+                                menos variable */
+                                height: 
+                                MediaQuery.of(context).orientation == Orientation.portrait ? 
+                                //getting up
+                                MediaQuery.of(context).size.width * 0.3 : 
+                                //laying down
+                                MediaQuery.of(context).size.width * 0.1 )
+                              ),
                               const SizedBox(height: 8.0),
                               Text(imageDataListToShow[index]!.name, textAlign: TextAlign.center,),
                               Text(imageDataListToShow[index]!.price.toString()),
@@ -258,7 +271,7 @@ class _MenuHistorialScreenState extends State<MenuHistorialScreen> {
 
    //despliega las comidas y las guarda en un respaldo
   Future<bool> toShowList(int value) async {
-    imageDataList = await DBService.db.showFoodsCategory(value, 1).then((List<ImageData>? res) => res??[]);
+    imageDataList = (await DbServiceOnline().showFoodsCategory(context, value, 1))!;
     if(imageDataList.isEmpty){
       return false;
     }else{
@@ -270,7 +283,7 @@ class _MenuHistorialScreenState extends State<MenuHistorialScreen> {
 
 
   Future<void> toShowListSelected(int value) async {
-    imageDataList = await DBService.db.showFoodsCategory(value, 1).then((List<ImageData>? res) => res??[]);
+    imageDataList = (await DbServiceOnline().showFoodsCategory(context, value, 1))!;
     imageDataListToShow = imageDataList;
   }
 }

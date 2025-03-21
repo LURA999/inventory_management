@@ -181,7 +181,8 @@ class _SettingsfoodScreenState extends State<SettingsfoodScreen> {
                                       Navigator.pop(context);
                                     }, child: Text('Cancelar')),
                                     ElevatedButton(onPressed: () async {
-                                      await DBService.db.deleteFood(param.idMenu!);
+                                      await DbServiceOnline().deleteImageFood(context, param.imagePath);
+                                      await DbServiceOnline().deleteFood(context, param.idMenu!);
                                       Navigator.pushNamed(context, '/settings');
                                     }, child: Text('Aceptar'))
                                   ],
@@ -196,7 +197,28 @@ class _SettingsfoodScreenState extends State<SettingsfoodScreen> {
                         )
                         : Container(),
                         rutaImage != ''  ? 
-                        Image.file(File(rutaImage))
+                        Image.network('http://10.0.2.2:8085/uploads/$rutaImage', 
+                              /* se calcula la altura con la anchura de la pantlla, porque la anchura es
+                             menos variable */
+                              height: 
+                              MediaQuery.of(context).orientation == Orientation.portrait ? 
+                              //getting up
+                              MediaQuery.of(context).size.width * 0.3 : 
+                              //laying down
+                              MediaQuery.of(context).size.width * 0.1,
+
+                              //segunda opcion
+                              errorBuilder: (context, error, stackTrace) => 
+                              Image.file(File(rutaImage), 
+                                /* se calcula la altura con la anchura de la pantlla, porque la anchura es
+                                menos variable */
+                                height: 
+                                MediaQuery.of(context).orientation == Orientation.portrait ? 
+                                //getting up
+                                MediaQuery.of(context).size.width * 0.3 : 
+                                //laying down
+                                MediaQuery.of(context).size.width * 0.1 )
+                              )
                         // Image.network(param.imagePath) 
                         : Container(),
                         SizedBox(
@@ -408,16 +430,20 @@ class _SettingsfoodScreenState extends State<SettingsfoodScreen> {
                                 if (param == null) {
                                   //cuando crearas una nueva comida
                                   sendObj.active = activeAux;
-                                  await DBService.db.newFood(sendObj).then(( int res) {
-                                    Navigator.pushNamed(context, '/settings');
+                                  await DbServiceOnline().postImageFood(context,rutaImage).then((bool arr) async {
+                                   if (arr) {
+                                    await DbServiceOnline().postFood(context,sendObj);
+                                   } else {
+                                    
+                                   }
                                   });
+                                  
                                 }else{
                                   //cuando se editas la comida
                                   sendObj.active = param.active;
                                   sendObj.idMenu = param.idMenu;
-                                  await DBService.db.updateFood(sendObj).then( (int res) {
-                                    Navigator.pushNamed(context, '/settings');
-                                  });
+                                  await DbServiceOnline().updateFood(context, sendObj);
+                                  Navigator.pushNamed(context, '/settings');
                                 }
                               }
                             }, 

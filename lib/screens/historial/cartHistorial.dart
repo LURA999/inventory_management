@@ -1,7 +1,6 @@
 import 'dart:io';
-
 import 'package:control_inv/models/services/services_model.dart';
-import 'package:control_inv/services/db_service_offline.dart';
+import 'package:control_inv/services/db_service_online.dart';
 import 'package:control_inv/widgets/widgets.dart';
 import 'package:flutter/material.dart';
 
@@ -122,7 +121,8 @@ class _CartHistorialScreenState extends State<CartHistorialScreen> {
 
     Future<void> loadingData() async {
       if (ModalRoute.of(context)?.settings.arguments is int) {
-        listOrigin = await DBService.db.showFoodsSale(idOrder);
+        listOrigin = await DbServiceOnline().showFoodsSale(context,idOrder);
+
         listBackUp = listOrigin;
         listToShow = orderCart(listOrigin!);
 
@@ -226,16 +226,28 @@ class _CartHistorialScreenState extends State<CartHistorialScreen> {
                               },
                               icon: Icon(Icons.highlight_remove_sharp)
                             ),
-                            Image.file(File( listToShow![index].imagePath),
-                             /* se calcula la altura con la anchura de la pantlla, porque la anchura es
+                            Image.network('http://10.0.2.2:8085/uploads/${listToShow![index].imagePath}', 
+                              /* se calcula la altura con la anchura de la pantlla, porque la anchura es
                              menos variable */
                               height: 
                               MediaQuery.of(context).orientation == Orientation.portrait ? 
                               //getting up
                               MediaQuery.of(context).size.width * 0.3 : 
                               //laying down
-                              MediaQuery.of(context).size.width * 0.1  ,
-                            ),
+                              MediaQuery.of(context).size.width * 0.1,
+
+                              //segunda opcion
+                              errorBuilder: (context, error, stackTrace) => 
+                              Image.file(File(listToShow![index].imagePath), 
+                                /* se calcula la altura con la anchura de la pantlla, porque la anchura es
+                                menos variable */
+                                height: 
+                                MediaQuery.of(context).orientation == Orientation.portrait ? 
+                                //getting up
+                                MediaQuery.of(context).size.width * 0.3 : 
+                                //laying down
+                                MediaQuery.of(context).size.width * 0.1 )
+                              ),
                             SizedBox(width: 20,),
                             Expanded(
                               child: Column(
@@ -363,7 +375,7 @@ class _CartHistorialScreenState extends State<CartHistorialScreen> {
                     onPressed: () async {
                       if (!(await Renovation().jwt())) {
                         //regresa a pantalla anterior, actualizando la orden
-                        List<CarthistorialModel>? orderOrigin = await DBService.db.showFoodsSale(idOrder);
+                        List<CarthistorialModel>? orderOrigin = await DbServiceOnline().showFoodsSale(context,idOrder);
                         List<int> idMenuOrigin = [];
                         List<int> idMenuBackup = [];
 
@@ -380,7 +392,7 @@ class _CartHistorialScreenState extends State<CartHistorialScreen> {
                         //insertar o actualizar
                         for (var e in listBackUp!) {
                           if (idMenuOrigin.contains(e.idMenu)) {
-                            await DBService.db.updateSale(e.amount, e.idSale);
+                            await DbServiceOnline().updateSale(context, e.idSale, e.amount);
                           }else {
                             SalesModel obj = SalesModel(
                               date: DateTime.now().toString(),
@@ -388,14 +400,14 @@ class _CartHistorialScreenState extends State<CartHistorialScreen> {
                               cveMenu: e.idMenu!,
                               id: idOrder
                             );
-                            await DBService.db.insertSale(obj);
+                            await DbServiceOnline().insertSale(context, obj);
                           }
                         }
 
                         //eliminar
                         for (var e in orderOrigin){
                           if (!idMenuBackup.contains(e.idMenu)) {
-                            await DBService.db.deleteSale(e.idSale);
+                            await DbServiceOnline().deleteOneSale(context, e.idSale);
                           } 
                         }
 

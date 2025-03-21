@@ -242,9 +242,15 @@ class DBService {
     return list.isNotEmpty ? list : null;
   }
 
-  Future<int> deleteSale(int id) async {
+  Future<int> deleteOneSale(int id) async {
     final db = await database;
     final results = await db.delete('sale', where: 'idSale = ?', whereArgs: [id]);
+    return results;
+  }
+
+  Future<int> deleteFullSale(int id) async {
+    final db = await database;
+    final results = await db.delete('sale', where: 'id = ?', whereArgs: [id]);
     return results;
   }
 
